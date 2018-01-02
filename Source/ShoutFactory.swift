@@ -168,9 +168,20 @@ open class ShoutView: UIView {
     let spaceBetweenLabels: CGFloat = 2
     let indicatorTakenHeight = Dimensions.indicatorBottomMargin + Dimensions.indicatorHeight
     
-    let checkFrame = convert(CGRect(x: 0, y: 0, width: superview.frame.width, height: 1), to: UIApplication.shared.keyWindow)
-    let intersectsStatusBar = checkFrame.intersects(UIApplication.shared.statusBarFrame)
-    let absoluteContentInsets: UIEdgeInsets = UIEdgeInsets(top: Dimensions.contentInsets.top + (UIApplication.shared.isStatusBarHidden || !intersectsStatusBar ? indicatorTakenHeight : 20), left: Dimensions.contentInsets.left, bottom: Dimensions.contentInsets.bottom, right: Dimensions.contentInsets.right)
+    let topInset: CGFloat
+    if #available(iOS 11.0, *) {
+        topInset = superview.safeAreaInsets.top
+    } else {
+        let checkFrame = convert(CGRect(x: 0, y: 0, width: superview.frame.width, height: 1), to: UIApplication.shared.keyWindow)
+        let intersectsStatusBar = checkFrame.intersects(UIApplication.shared.statusBarFrame)
+        topInset = (UIApplication.shared.isStatusBarHidden || !intersectsStatusBar ? indicatorTakenHeight : 20)
+    }
+    let absoluteContentInsets = UIEdgeInsets(
+        top: Dimensions.contentInsets.top + max(indicatorTakenHeight, topInset),
+        left: Dimensions.contentInsets.left,
+        bottom: Dimensions.contentInsets.bottom,
+        right: Dimensions.contentInsets.right
+    )
     
     let textOffsetX = absoluteContentInsets.left + (imageView.image != nil ? imageView.frame.width + Dimensions.textToImageMargin : 0)
     let labelWidth = totalWidth - textOffsetX - absoluteContentInsets.right
